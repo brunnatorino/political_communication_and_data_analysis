@@ -1,0 +1,80 @@
+import pandas as pd
+
+df = pd.read_csv('articles1.csv')
+df2 = pd.read_csv('articles2.csv')
+df3 = pd.read_csv('articles3.csv')
+
+import datetime as dt
+
+df = pd.concat([df,df2], sort=False)
+df = pd.concat([df,df3], sort=False)
+df['date'] =pd.to_datetime(df.date)
+df = df.sort_values('date') # This now sorts in 
+
+df = df.reset_index()
+
+
+del df['Unnamed: 0']
+del df['index']
+
+df.head()
+
+import nltk
+from nltk.corpus import stopwords
+
+nltk.download('stopwords')
+stop = stopwords.words('english')
+df['content'] = df['content'].apply(lambda x: ' '.join([word for word in x.split() if word not in (stop)]))
+
+economy = df[df['content'].astype(str).str.contains('economy', case=False)]
+rates = df[df['content'].astype(str).str.contains('interest rates', case=False)]
+unemployment = df[df['content'].astype(str).str.contains('unemployment|employment', case=False)]
+inflation = df[df['content'].astype(str).str.contains('inflation', case=False)]
+wages = df[df['content'].astype(str).str.contains('wages|wage|salaries|salary', case=False)]
+recession = df[df['content'].astype(str).str.contains('recession|financial crisis', case=False)]
+trade = df[df['content'].astype(str).str.contains('trade', case=False)]
+
+everything = pd.concat([economy,rates,unemployment,inflation,trade,wages,recession])
+
+economy = economy.set_index(['date'])
+rates= rates.set_index(['date'])
+unemployment = unemployment.set_index(['date'])
+inflation = inflation.set_index(['date'])
+trade = trade.set_index(['date'])
+wages = wages.set_index(['date'])
+recession = recession.set_index(['date'])
+everything = everything.set_index(['date'])
+
+from textblob import TextBlob, Word, Blobber
+from textblob.classifiers import NaiveBayesClassifier
+from textblob.taggers import NLTKTagger
+
+
+economy[['polarity', 'subjectivity']] = economy['content'].apply(lambda content: pd.Series(TextBlob(content).sentiment))
+rates[['polarity', 'subjectivity']] = rates['content'].apply(lambda content: pd.Series(TextBlob(content).sentiment))
+unemployment[['polarity', 'subjectivity']] = unemployment['content'].apply(lambda content: pd.Series(TextBlob(content).sentiment))
+inflation[['polarity', 'subjectivity']] = inflation['content'].apply(lambda content: pd.Series(TextBlob(content).sentiment))
+trade[['polarity', 'subjectivity']] = trade['content'].apply(lambda content: pd.Series(TextBlob(content).sentiment))
+wages[['polarity', 'subjectivity']] = wages['content'].apply(lambda content: pd.Series(TextBlob(content).sentiment))
+recession[['polarity', 'subjectivity']] = recession['content'].apply(lambda content: pd.Series(TextBlob(content).sentiment))
+everything[['polarity', 'subjectivity']] = everything['content'].apply(lambda content: pd.Series(TextBlob(content).sentiment))
+
+from textblob import TextBlob, Word, Blobber
+from textblob.classifiers import NaiveBayesClassifier
+from textblob.taggers import NLTKTagger
+
+
+economy[['polarity_title', 'subjectivity_title']] = economy['title'].apply(lambda title: pd.Series(TextBlob(title).sentiment))
+rates[['polarity_title', 'subjectivity_title']] = rates['title'].apply(lambda title: pd.Series(TextBlob(title).sentiment))
+unemployment[['polarity_title', 'subjectivity_title']] = unemployment['title'].apply(lambda title: pd.Series(TextBlob(title).sentiment))
+inflation[['polarity_title', 'subjectivity_title']] = inflation['title'].apply(lambda title: pd.Series(TextBlob(title).sentiment))
+trade[['polarity_title', 'subjectivity_title']] = trade['title'].apply(lambda title: pd.Series(TextBlob(title).sentiment))
+wages[['polarity_title', 'subjectivity_title']] = wages['title'].apply(lambda title: pd.Series(TextBlob(title).sentiment))
+recession[['polarity_title', 'subjectivity_title']] = recession['title'].apply(lambda title: pd.Series(TextBlob(title).sentiment))
+everything[['polarity_title', 'subjectivity_title']] = everything['title'].apply(lambda title: pd.Series(TextBlob(title).sentiment))
+
+
+
+             
+             
+  
